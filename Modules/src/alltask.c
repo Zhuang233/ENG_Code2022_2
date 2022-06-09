@@ -117,3 +117,4 @@ void card_task(void)
 	if(Key_Check_Hold(&Keys.KEY_B))
 		FunctionMODE = STANDBY;
 }
+

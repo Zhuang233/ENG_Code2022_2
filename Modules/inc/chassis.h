@@ -9,3 +9,4 @@ extern ramp_struct chassis_ramp[2];
 void chassis_ramp_init(float slope,float dt);
 void chassis_control(void);
 #endif
+

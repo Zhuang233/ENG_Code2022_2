@@ -292,6 +292,9 @@ void exchange_task(void)
 		}
 	}
 }
+
+
+
 void lift_task(void)
 {
 	uint8_t i;

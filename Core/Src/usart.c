@@ -124,3 +124,4 @@ void usart_dma_init(void)
   uart_receive_dma_no_it(&huart1, USART1_Rx_Buffer, USART1_RX_BUFFER_SIZE);
   uart_receive_dma_no_it(&huart3, USART3_Rx_Buffer, USART3_RX_BUFFER_SIZE);
 }
+

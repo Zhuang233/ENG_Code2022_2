@@ -313,3 +313,4 @@ void draw_front_sight(void)
 	
 	data_pack_handle(STUDENT_INTERACTIVE_DATA_CMD_ID,(uint8_t *)&client_custom_graphic_double_t,DOUBLE_FIGURE_TOTAL_LEN);
 }
+

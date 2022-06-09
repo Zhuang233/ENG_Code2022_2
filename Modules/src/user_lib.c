@@ -72,3 +72,4 @@ void ramp_calculate(ramp_struct *ramp,float target)
     else ramp->output = 0;
   }
 }
+
