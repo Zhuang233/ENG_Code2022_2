@@ -31,12 +31,12 @@
 #define PID_LIFT_SYN_KD 0.0f
 
 //翻转
-#define PID_FLIP_SPD_KP 4.0f  //4.0
+#define PID_FLIP_SPD_KP 15.0f  //4.0
 #define PID_FLIP_SPD_KI 1.0f  //1.0
 #define PID_FLIP_SPD_KD 0.0f
-#define PID_FLIP_POS_KP 0.3f  //0.3
+#define PID_FLIP_POS_KP 0.1f  //0.3
 #define PID_FLIP_POS_KI 0.0f
-#define PID_FLIP_POS_KD 0.0f //0.01
+#define PID_FLIP_POS_KD 0.001f //0.01
 
 //地上矿夹子旋转
 #define PID_GNDROTATE_SPD_KP 4.0f
@@ -150,7 +150,7 @@ void eng_pid_init(void)
 	for(i=0;i<2;i++)
 	{
 		pidInit(&pid_flip_spd[i],10000,16000,PID_FLIP_SPD_KP,PID_FLIP_SPD_KI,PID_FLIP_SPD_KD);
-		pidInit(&pid_flip_pos[i],0,2000,PID_FLIP_POS_KP,PID_FLIP_POS_KI,PID_FLIP_POS_KD);
+		pidInit(&pid_flip_pos[i],0,8000,PID_FLIP_POS_KP,PID_FLIP_POS_KI,PID_FLIP_POS_KD);
 		
 		pidInit(&pid_spin_spd[i],10000,10000,PID_SPIN_SPD_KP,PID_SPIN_SPD_KI,PID_SPIN_SPD_KD);
 	}

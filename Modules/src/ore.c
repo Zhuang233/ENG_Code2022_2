@@ -324,20 +324,20 @@ void flip_spin_task(void)
 	else
 	{
 		for(i=0;i<2;i++)
-		 
+		{ 
 //			pid_flip_pos[i].kp = pkp;
 //			pid_flip_pos[i].ki = pki;
 //			pid_flip_pos[i].kd = pkd;
 //			pid_flip_spd[i].kp = skp;
 //			pid_flip_spd[i].ki = ski;
 //			pid_flip_spd[i].kd = skd;
-		{
+		
 			pid_flip_pos[i].pid_calculate(&pid_flip_pos[i],motor_msg[i+8].angle_desired,motor_msg[i+8].angle);
 			pid_flip_spd[i].pid_calculate(&pid_flip_spd[i],pid_flip_pos[i].outPID,motor_msg[i+8].speed_actual);
 		}
 			
-//			motor_msg[8].given_current = para_cos*cos(3.1415/80000*motor_msg[8].angle)+pid_flip_spd[0].outPID;
-//			motor_msg[9].given_current = -para_cos*cos(3.1415/80000*motor_msg[8].angle)+pid_flip_spd[1].outPID;
+			motor_msg[8].given_current = para_cos*cos(3.1415/80000*motor_msg[8].angle)+pid_flip_spd[0].outPID;
+			motor_msg[9].given_current = -para_cos*cos(3.1415/80000*motor_msg[8].angle)+pid_flip_spd[1].outPID;
 		
 		if(spin_flag == 1)
 			pid_spin_spd[0].pid_calculate(&pid_spin_spd[0],SPINSPD_SLOW,motor_msg[10].speed_actual);
@@ -353,8 +353,8 @@ void flip_spin_task(void)
 			pid_spin_spd[1].pid_calculate(&pid_spin_spd[1],0,motor_msg[11].speed_actual);
 	}
 
-	//CAN2_Set_AheadCur(motor_msg[8].given_current, motor_msg[9].given_current, pid_spin_spd[0].outPID, pid_spin_spd[1].outPID);
-	CAN2_Set_AheadCur(pid_flip_spd[0].outPID, pid_flip_spd[1].outPID, pid_spin_spd[0].outPID, pid_spin_spd[1].outPID);
+	CAN2_Set_AheadCur(motor_msg[8].given_current, motor_msg[9].given_current, pid_spin_spd[0].outPID, pid_spin_spd[1].outPID);
+	//CAN2_Set_AheadCur(pid_flip_spd[0].outPID, pid_flip_spd[1].outPID, pid_spin_spd[0].outPID, pid_spin_spd[1].outPID);
 }
 
 void groundore_card_task(void)
@@ -413,22 +413,25 @@ void d_lift(int32_t pos)
 //·­×ª
 void flip(int32_t pos)
 {
-	int32_t error = motor_msg[8].angle - pos;
-	if(error > d_pos)
-	{
-		desired_angle[8] -= d_pos;
-		if(desired_angle[8] <= pos)
-			desired_angle[8] = pos;
-	}
-	else if(error < -d_pos)
-	{
-		desired_angle[8] += d_pos;
-		if(desired_angle[8] >= pos)
-			desired_angle[8] = pos;	
-	}
-	else
-		desired_angle[8] = pos;
+//	int32_t error = motor_msg[8].angle - pos;
+//	if(error > d_pos)
+//	{
+//		desired_angle[8] -= d_pos;
+//		if(desired_angle[8] <= pos)
+//			desired_angle[8] = pos;
+//	}
+//	else if(error < -d_pos)
+//	{
+//		desired_angle[8] += d_pos;
+//		if(desired_angle[8] >= pos)
+//			desired_angle[8] = pos;	
+//	}
+//	else
+//		desired_angle[8] = pos;
+	if(pos > 80000) pos = 80000;
+	else if(pos < 0) pos = 0;
 	
+	desired_angle[8] = pos;
 	desired_angle[9] = -desired_angle[8];
 }
 
