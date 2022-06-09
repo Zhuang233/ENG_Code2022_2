@@ -31,7 +31,7 @@
 #define PID_LIFT_SYN_KD 0.0f
 
 //·­×ª
-#define PID_FLIP_SPD_KP 15.0f  //4.0
+#define PID_FLIP_SPD_KP 10.0f  //4.0
 #define PID_FLIP_SPD_KI 1.0f  //1.0
 #define PID_FLIP_SPD_KD 0.0f
 #define PID_FLIP_POS_KP 0.1f  //0.3

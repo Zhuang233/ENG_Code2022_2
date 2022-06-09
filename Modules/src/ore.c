@@ -23,11 +23,11 @@ float skd = 0.0;
 #define SPINSPD_FAST 5000
 #define SPINSPD_SLOW 1000
 #define AIR_POS 200000U
-#define BIG_LIFT_POS 300000U
+#define BIG_LIFT_POS 150000U
 #define SMALL_LIFT_POS 100000U
 #define EXCHANGE_POS 200000U
 #define DOWN_POS 1000U
-#define FLIP_POS 74000U
+#define FLIP_POS 80000U
 #define FLIP_HOLD_POS 30000U
 
 uint32_t d_pos = 1000;
@@ -37,9 +37,12 @@ uint8_t fetch_which = 0;
 uint8_t ore_suckin_flag = 0;
 float para_cos = 2000;
 
+
+int32_t test_angle_lift = 0;
+int32_t test_angle_flip = 0;
+
 void fetch_in_air(void)
 {
-	static bool is_trigger = false;
 	static bool is_exit = false;
 	if(FunctionMODE == FETCHAIRMODE)
 	{
@@ -48,13 +51,9 @@ void fetch_in_air(void)
 			HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_SET); 		//夹子张开
 			HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_SET);
 		
-//			delay_in_seconds(&delay_time,0.5);
-//			if(delay_flag == 1)
-//			{
 				osDelay(500);
 				HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_RESET); //泄压
 				fetch_exchange_stage = 1;
-//			}
 		}
 		
 		if(fetch_exchange_stage == 1)							//抬升
@@ -80,15 +79,10 @@ void fetch_in_air(void)
 			{
 				HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_RESET);			//加紧
 				HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_RESET);
-			  is_trigger = true;
-			}
-			if(is_trigger == true)
-				delay_in_seconds(&delay_time,1);
-			if(delay_flag == 1)
-			{
+				osDelay(1000);
 				fetch_exchange_stage = 4;
-				is_trigger = false;
-			}			
+			}
+			
 		}				
 		if(fetch_exchange_stage == 4)															
 		{
@@ -153,6 +147,13 @@ void fetch_ore_in_hole(void)
 			}
 		}
 		
+		//test
+		
+//		d_lift(test_angle_lift);
+//		flip(test_angle_flip);		
+		
+		//
+		
 		if(fetch_exchange_stage == 2)
 		{
 			if(RC_CtrlData.mouse.press_l == 1)    //按下鼠标左键
@@ -161,14 +162,13 @@ void fetch_ore_in_hole(void)
 			if(is_press == true && !RC_CtrlData.mouse.press_l)
 			{
 				HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_RESET);			//加紧
-				HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_RESET);		
+				HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_RESET);
 				
-				delay_in_seconds(&delay_time,1);
-				if(delay_flag == 1)				
-				{
-					fetch_exchange_stage = 3;	
-					is_press = false;			
-				}					
+				osDelay(1000);
+				
+				fetch_exchange_stage = 3;	
+				is_press = false;			
+									
 			}
 		}
 		
@@ -184,8 +184,7 @@ void fetch_ore_in_hole(void)
 		
 		if(fetch_exchange_stage == 4)
 		{
-			delay_in_seconds(&delay_time,1);
-			if(delay_flag == 1)
+				osDelay(1000);
 				fetch_exchange_stage = 5;
 		}
 		

@@ -121,6 +121,13 @@ const osThreadAttr_t OtherTask_attributes = {
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityHigh,
 };
+/* Definitions for testTask */
+osThreadId_t testTaskHandle;
+const osThreadAttr_t testTask_attributes = {
+  .name = "testTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -146,6 +153,7 @@ void StartRefereeTask(void *argument);
 void StartChassisTask(void *argument);
 void StartOreTask(void *argument);
 void StartOtherTask(void *argument);
+void TestTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -196,7 +204,6 @@ int main(void)
   MX_CAN1_Init();
   MX_CAN2_Init();
   /* USER CODE BEGIN 2 */
-
   __HAL_TIM_ENABLE(&htim2);
   can_filter_init();   
   usart_dma_init();  //open dbus\referee  uart receive it
@@ -207,11 +214,7 @@ int main(void)
 	
 //  Testmoto_PID_Init();
   eng_pid_init();
-	HAL_Delay(1000);
-	HAL_Delay(1000);
-	HAL_Delay(1000);
-	HAL_Delay(1000);
-	HAL_Delay(1000);
+	HAL_Delay(3000);
   zeropoint_init();
   
   /* USER CODE END 2 */
@@ -256,6 +259,9 @@ int main(void)
 
   /* creation of OtherTask */
   OtherTaskHandle = osThreadNew(StartOtherTask, NULL, &OtherTask_attributes);
+
+  /* creation of testTask */
+  testTaskHandle = osThreadNew(TestTask, NULL, &testTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1034,6 +1040,24 @@ void StartOtherTask(void *argument)
     osDelay(10);
   }
   /* USER CODE END StartOtherTask */
+}
+
+/* USER CODE BEGIN Header_TestTask */
+/**
+* @brief Function implementing the testTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_TestTask */
+void TestTask(void *argument)
+{
+  /* USER CODE BEGIN TestTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END TestTask */
 }
 
 /**
