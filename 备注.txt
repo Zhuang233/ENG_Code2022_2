@@ -1,0 +1,23 @@
+板载：      LED：绿色--PF14   红色--PE11  8颗绿色灯珠--PG1~PG8（高电平熄灭 低电平点亮）
+	按键：黑色--复位  白色--PB2（按下为高）
+	可控电源：PH2-PH5
+自定义：  舵机：夹子 PD12(TIM4->CH1 H)
+	          图传 PD13(TIM4->CH2 G)
+	          救援左 PD14(TIM4->CH3 F)
+	          救援右 PD15(TIM4->CH4 E)
+	          复活卡向下 PH10(TIM5->CH1 D)
+                          复活卡伸出 PH11(TIM5->CH2 C)
+	          障碍块左 PH12(TIM5->CH3 B)
+                          障碍块右 PI0(TIM5->CH4 A)
+	          摄像头 PI5(TIM8->CH1 W)
+	微动：翻转校准 PF1 (I1 I2) LABEL--SWITCH_FLIP
+	          伸缩校准 PE5 (J1 J2) LABEL--SWITCH_STRETCH
+	摄像头：PE6（K1）
+	光电：PE12（K2）
+	电磁阀：阀1、2：PC2-PC3  阀3、4：PC4-PC5  阀5、6：PA5、PF10
+                电机：CAN1--[0]-[3] 底盘 3508*4      pid_chassis_spd[4]
+		      [4]-[5] 翻转 3508*2      pid_flip_spd[2] pid_flip_pos[2]
+		      [6]-[7] 伸缩 2006*2      pid_stretch_spd[2] pid_stretch_pos[2]  改成只用一个了
+	          CAN2--[8]-[9] 转矿 2006*2      pid_spin_spd[2]
+		      [10]-[13] 抬升 3508*4  pid_lift_spd[4] pid_lift_pos[4] pid_lift_syn[4]
+按键：见代码注释
