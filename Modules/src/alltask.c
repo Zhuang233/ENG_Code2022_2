@@ -5,6 +5,9 @@
 #include "eng_control.h"
 #include "remote_control.h"
 #include "Key.h"
+#include "pwm.h"
+#include "stdbool.h"
+#include "cmsis_os.h"
 
 #define CARD_POS 10000U
 
@@ -14,6 +17,8 @@
 uint8_t card = 0;
 uint8_t barriar_stage = 0;
 
+bool rescuing = false;
+
 void chassis_task(void)
 {
   uint8_t i;
@@ -22,7 +27,7 @@ void chassis_task(void)
     pid_chassis_spd[0].outPID = pid_chassis_spd[1].outPID = pid_chassis_spd[2].outPID = pid_chassis_spd[3].outPID = 0;
   else
   {
-    chassis_control();
+			chassis_control();
     for(i=0;i<4;i++)
       pid_chassis_spd[i].pid_calculate(&pid_chassis_spd[i],motor_msg[i].speed_desired,motor_msg[i].speed_actual);
   }
@@ -54,9 +59,36 @@ void rescue_task(void)
 {
 	if(FunctionMODE == RESCUEMODE)
 	{
-		TIM4->CCR3 = 750;
-		TIM4->CCR4 = 800;
-		if(Key_Check_Hold(&Keys.KEY_B))		
+		CAMERA = RESCUE_CAMERA_ANGEL;//调整图传视角
+		
+		if(!rescuing)//还没拖着车
+		{
+			if(RC_CtrlData.mouse.press_l)//单击左键救援
+			{
+				RESCUE_L = RESCUE_DOWN_L;
+				RESCUE_R = RESCUE_DOWN_R;
+				rescuing = true;
+				osDelay(300);
+			}
+		}
+		else
+		{
+			if(RC_CtrlData.mouse.press_l)//单击左键释放(推着防止卡住)
+			{
+				chassis_auto_control = true;
+				vy = 1000;
+				vx = 0;
+				vr = 0;
+				osDelay(500);
+				RESCUE_L = RESCUE_UP_L;
+				RESCUE_R = RESCUE_UP_R;
+				chassis_auto_control = false;
+				
+				rescuing = false;
+			}
+		}
+
+		if(Key_Check_Hold(&Keys.KEY_B))//中途退出		
 				FunctionMODE = STANDBY;
 	}
 }

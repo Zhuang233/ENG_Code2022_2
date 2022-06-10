@@ -10,7 +10,7 @@
 #include "arm_math.h"
 #include "main.h"
 #include "ore.h"
-
+#include "pwm.h"
 
 uint8_t FunctionMODE = 0;
 
@@ -31,7 +31,7 @@ uint8_t mode = STOP;
 
 uint8_t spin_flag = 0;
 
-
+int16_t test_angle = 750;
 
 
 /**
@@ -171,9 +171,10 @@ void SetFuncMode(void)  //设置功能模式
 		}
 		TIM4->CCR1 = 1250;   //救援障碍块复原
 		TIM4->CCR2 = 250;	
-		TIM4->CCR3 = 1250;
-		TIM4->CCR4 = 300;		
-												
+//		TIM4->CCR3 = 1250;
+//		TIM4->CCR4 = 300;		
+		CAMERA = 	DEFAULT_CAMERA_ANGEL;
+		
 		HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_RESET);//缩回
 		
 		motor_msg[15].angle_desired = 1000;

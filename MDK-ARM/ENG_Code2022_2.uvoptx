@@ -163,37 +163,52 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>TIM2-&gt;CNT,0x0A</ItemText>
+          <ItemText>test_angle_lift,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>error,0x0A</ItemText>
+          <ItemText>test_angle_flip,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pos,0x0A</ItemText>
+          <ItemText>FunctionMODE</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>para_cos*cos(3.1415/80000*motor_msg[8].angle)</ItemText>
+          <ItemText>TIM8-&gt;CCR1,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>test_angle_lift,0x0A</ItemText>
+          <ItemText>motor_msg,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>test_angle_flip,0x0A</ItemText>
+          <ItemText>chassis_auto_control</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>FunctionMODE</ItemText>
+          <ItemText>vy</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>vx</ItemText>
+        </Ww>
+        <Ww>
+          <count>8</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>vr</ItemText>
+        </Ww>
+        <Ww>
+          <count>9</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>test_angle,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
