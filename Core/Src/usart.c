@@ -3,9 +3,12 @@
 #include "stdio.h"
 #include "array.h"
 #include "referee.h"
+#include "WHT101.h"
+
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart3;
+extern UART_HandleTypeDef huart8;
 //uint8_t		USART1_Tx_buffer[USART1_TX_BUFFER_SIZE] = {0};
 uint8_t		USART1_Rx_Buffer[USART1_RX_BUFFER_SIZE] = {0};
 
@@ -124,4 +127,11 @@ void usart_dma_init(void)
   uart_receive_dma_no_it(&huart1, USART1_Rx_Buffer, USART1_RX_BUFFER_SIZE);
   uart_receive_dma_no_it(&huart3, USART3_Rx_Buffer, USART3_RX_BUFFER_SIZE);
 }
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart->Instance==UART8)
+	{
+		decode_WHT101_data();
+		HAL_UART_Receive_IT(&huart8,&yaw_data,1);//ª÷∏¥Ω” ‹÷–∂œ
+	}
+}

@@ -549,6 +549,11 @@
               <FileType>1</FileType>
               <FilePath>..\Modules\src\user_lib.c</FilePath>
             </File>
+            <File>
+              <FileName>WHT101.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Modules\src\WHT101.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
