@@ -23,7 +23,7 @@ float skd = 0.0;
 #define SPINSPD_FAST 5000
 #define SPINSPD_SLOW 1000
 #define AIR_POS 200000U
-#define BIG_LIFT_POS 150000U
+#define BIG_LIFT_POS 80000U
 #define SMALL_LIFT_POS 100000U
 #define EXCHANGE_POS 200000U
 #define DOWN_POS 1000U
@@ -124,10 +124,10 @@ void fetch_ore_in_hole(void)
 	static bool is_exit = false;
 	if(FunctionMODE == FETCHBIGMODE || FunctionMODE == FETCHSMALLMODE)
 	{
-		HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_SET); 		//夹子张开
-		HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_SET);
 		if(fetch_exchange_stage == 0)							//抬升
 		{
+			HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_SET); 		//夹子张开
+			HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_SET);
 			if(FunctionMODE == FETCHBIGMODE)
 				lift_pos = BIG_LIFT_POS;
 			else if(FunctionMODE == FETCHSMALLMODE)
