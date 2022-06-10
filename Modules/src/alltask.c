@@ -9,7 +9,7 @@
 #include "stdbool.h"
 #include "cmsis_os.h"
 
-#define CARD_POS 10000U
+#define CARD_POS 950000U
 
 //空接任务，兑换任务
 //分开的抬升、夹子位置、伸缩位置等任务
@@ -18,6 +18,7 @@ uint8_t card = 0;
 uint8_t barriar_stage = 0;
 
 bool rescuing = false;
+bool card_out = false;
 
 void chassis_task(void)
 {
@@ -145,8 +146,27 @@ void barriar_task(void)
 void card_task(void)
 {
 	if(FunctionMODE == CARDMODE)
-		motor_msg[15].angle_desired = CARD_POS;
+	{
+		CAMERA = CARD_CAMERA_ANGEL;
+		if(!card_out && RC_CtrlData.mouse.press_l )
+		{
+			desired_angle[15] = CARD_POS;
+			osDelay(300);
+			card_out = true;
+		}
+		else if(card_out && RC_CtrlData.mouse.press_l)
+		{
+			desired_angle[15] = 0;
+			osDelay(300);
+			card_out = false;
+		}
+	}
+	
 	if(Key_Check_Hold(&Keys.KEY_B))
+	{
+		desired_angle[15] = 0;
+		card_out = false;
 		FunctionMODE = STANDBY;
+	}
 }
 

@@ -13,6 +13,9 @@
 #define RESCUE_CAMERA_ANGEL 600
 
 #define DEFAULT_CAMERA_ANGEL 810;
+
+#define CARD_CAMERA_ANGEL 600;
+
 void PWM_Start(void);
 
 #endif

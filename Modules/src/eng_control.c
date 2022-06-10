@@ -165,7 +165,7 @@ void eng_pid_init(void)
 	pidInit(&pid_gndmove_pos,0,1000,PID_GNDMOVE_POS_KP,PID_GNDMOVE_POS_KI,PID_GNDMOVE_POS_KD);
 	
 	pidInit(&pid_card_spd,10000,10000,PID_CARD_SPD_KP,PID_CARD_SPD_KI,PID_CARD_SPD_KD);
-	pidInit(&pid_card_pos,0,1000,PID_CARD_POS_KP,PID_CARD_POS_KI,PID_CARD_POS_KD);
+	pidInit(&pid_card_pos,0,5000,PID_CARD_POS_KP,PID_CARD_POS_KI,PID_CARD_POS_KD);
 
 }
 
