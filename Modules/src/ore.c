@@ -167,8 +167,7 @@ void fetch_ore_in_hole(void)
 				osDelay(1000);
 				
 				fetch_exchange_stage = 3;	
-				is_press = false;			
-									
+				is_press = false;						
 			}
 		}
 		
@@ -177,18 +176,23 @@ void fetch_ore_in_hole(void)
 			flip(FLIP_HOLD_POS);
 			if(desired_angle[8] == FLIP_HOLD_POS && motor_msg[8].angle < (FLIP_HOLD_POS + 5000))						//抬起矿	
 			{
-				HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_RESET);				//缩回
 				fetch_exchange_stage = 4;
 			}				
 		}
 		
-		if(fetch_exchange_stage == 4)
+		if(fetch_exchange_stage == 4)//操作手判断环节
 		{
-				osDelay(1000);
+			if(RC_CtrlData.mouse.press_r == 1)//右键取到矿石收回
+			{
 				fetch_exchange_stage = 5;
+			}
+			else if(RC_CtrlData.mouse.press_l == 1)//左键没取到重来
+			{
+				fetch_exchange_stage = 0;
+			}
 		}
 		
-		if(fetch_exchange_stage == 5)
+		if(fetch_exchange_stage == 5)//降下
 		{
 			lift(1000);
 			if(desired_angle[4] == 1000 && motor_msg[4].angle < 10000)
