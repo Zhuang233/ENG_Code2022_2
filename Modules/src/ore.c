@@ -9,6 +9,7 @@
 #include "timer.h"
 #include "math.h"
 #include "cmsis_os.h"
+#include "pwm.h"
 
 float pkp = 0.0;
 float pki = 0.0;
@@ -22,14 +23,21 @@ float skd = 0.0;
 
 #define SPINSPD_FAST 5000
 #define SPINSPD_SLOW 1000
-#define AIR_POS 200000U
+#define AIR_POS 370000U
 #define BIG_LIFT_POS 80000U
 #define SMALL_LIFT_POS 100000U
-#define EXCHANGE_POS 200000U
+#define EXCHANGE_POS 370000U
+
 #define DOWN_POS 1000U
-#define FLIP_POS 80000U
+
+#define EXCHANGE_FLIP_POS 80000U
+#define BIG_FLIP_POS 80000U
+#define SMALL_FLIP_POS 80000U
+#define AIR_FLIP_POS 80000U
+
 #define FLIP_HOLD_POS 30000U
 
+extern float para_wheel_front;
 uint32_t d_pos = 1000;
 uint8_t fetch_exchange_stage = 0;
 uint8_t fetch_flag = 0;
@@ -40,68 +48,75 @@ float para_cos = 2000;
 
 int32_t test_angle_lift = 0;
 int32_t test_angle_flip = 0;
+int32_t test_angle_camera = 750;
 
 void fetch_in_air(void)
 {
 	static bool is_exit = false;
 	if(FunctionMODE == FETCHAIRMODE)
 	{
-		if(fetch_exchange_stage == 0)
-		{
-			HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_SET); 		//夹子张开
-			HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_SET);
-		
-				osDelay(500);
-				HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_RESET); //泄压
-				fetch_exchange_stage = 1;
-		}
-		
-		if(fetch_exchange_stage == 1)							//抬升
-		{
-			lift(AIR_POS);						
-			if(desired_angle[4] == AIR_POS && motor_msg[4].angle > (AIR_POS - 10000U))	
-				fetch_exchange_stage = 2;
-		}
-		
-		if(fetch_exchange_stage == 2)																										//夹子翻出
-		{
-			flip(FLIP_POS);
-			if(desired_angle[8] == FLIP_POS && motor_msg[8].angle > (FLIP_POS - 10000U))
+		if(is_exit == false)
+		{	
+			para_wheel_front = 1.5;
+			if(fetch_exchange_stage == 0)
 			{
-				HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_SET);					//伸出
-				fetch_exchange_stage = 3;
-			}
-		}
-		
-		if(fetch_exchange_stage == 3)																				//空接
-		{
-			if(HAL_GPIO_ReadPin(SENSOR_GPIO_Port,SENSOR_Pin) == GPIO_PIN_RESET)		//光电被触发
-			{
-				HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_RESET);			//加紧
-				HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_RESET);
-				osDelay(1000);
-				fetch_exchange_stage = 4;
+				HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_SET); 		//夹子张开
+				HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_SET);
+			
+					osDelay(500);
+					HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_RESET); //泄压
+					fetch_exchange_stage = 1;
 			}
 			
-		}				
-		if(fetch_exchange_stage == 4)															
-		{
-			HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_RESET);				//缩回
-			flip(FLIP_HOLD_POS);
-			if(desired_angle[8] == FLIP_HOLD_POS && motor_msg[8].angle < (FLIP_HOLD_POS + 5000U))						//抬起矿
-				fetch_exchange_stage = 5;
+			if(fetch_exchange_stage == 1)							//抬升
+			{
+				lift(AIR_POS);						
+				if(desired_angle[4] == AIR_POS && motor_msg[4].angle > (AIR_POS - 10000U))	
+					fetch_exchange_stage = 2;
+			}
+			
+			if(fetch_exchange_stage == 2)																										//夹子翻出
+			{
+				flip(AIR_FLIP_POS);
+				if(desired_angle[8] == AIR_FLIP_POS && motor_msg[8].angle > (AIR_FLIP_POS - 10000U))
+				{
+					HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_SET);					//伸出
+					fetch_exchange_stage = 3;
+				}
+			}
+			
+			if(fetch_exchange_stage == 3)																				//空接
+			{
+				if(HAL_GPIO_ReadPin(SENSOR_GPIO_Port,SENSOR_Pin) == GPIO_PIN_RESET)		//光电被触发
+				{
+					HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_RESET);			//加紧
+					HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_RESET);
+					osDelay(1000);
+					fetch_exchange_stage = 4;
+				}
+				
+			}				
+			if(fetch_exchange_stage == 4)															
+			{
+				HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_RESET);				//缩回
+				flip(FLIP_HOLD_POS);
+				if(desired_angle[8] == FLIP_HOLD_POS && motor_msg[8].angle < (FLIP_HOLD_POS + 5000U))						//抬起矿
+					fetch_exchange_stage = 5;
+			}
+			if(fetch_exchange_stage == 5)															//降下
+			{
+				lift(1000);
+				if(desired_angle[4] == 1000 && motor_msg[4].angle < 10000)
+					fetch_exchange_stage = 6;
+			}
+			if(fetch_exchange_stage == 6)
+			{
+				para_wheel_front = 1.0;
+				FunctionMODE = STANDBY;
+			}
+			if(Key_Check_Hold(&Keys.KEY_B))		
+				is_exit = true;
 		}
-		if(fetch_exchange_stage == 5)															//降下
-		{
-			lift(1000);
-			if(desired_angle[4] == 1000 && motor_msg[4].angle < 10000)
-				fetch_exchange_stage = 6;
-		}
-		if(fetch_exchange_stage == 6)
-			FunctionMODE = STANDBY;
-		
-		if(Key_Check_Hold(&Keys.KEY_B))		
-			is_exit = true;
 		
 		if(is_exit == true)
 		{			
@@ -111,6 +126,7 @@ void fetch_in_air(void)
 			if(desired_angle[8] == 5000 && motor_msg[8].angle < 15000 && desired_angle[4] == 1000 && motor_msg[4].angle<10000)
 			{
 				is_exit = false;
+				para_wheel_front = 1.0;
 				FunctionMODE = STANDBY;			
 			}
 		}
@@ -124,83 +140,90 @@ void fetch_ore_in_hole(void)
 	static bool is_exit = false;
 	if(FunctionMODE == FETCHBIGMODE || FunctionMODE == FETCHSMALLMODE)
 	{
-		if(fetch_exchange_stage == 0)							//抬升
+		if(is_exit == false)
 		{
-			HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_SET); 		//夹子张开
-			HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_SET);
-			if(FunctionMODE == FETCHBIGMODE)
-				lift_pos = BIG_LIFT_POS;
-			else if(FunctionMODE == FETCHSMALLMODE)
-				lift_pos = SMALL_LIFT_POS;
-			lift(lift_pos);						
-			if(desired_angle[4] == lift_pos && motor_msg[4].angle > (lift_pos - 10000U))
-				fetch_exchange_stage = 1;
-		}
-		
-		if(fetch_exchange_stage == 1)
-		{
-			flip(FLIP_POS);								//翻转
-			if(desired_angle[8] == FLIP_POS && motor_msg[8].angle > (FLIP_POS - 10000U))
+			CAMERA = HOLE_CAMERA_ANGEL;
+			para_wheel_front = 1.5;
+			if(fetch_exchange_stage == 0)							//抬升
 			{
-				HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_SET);					//伸出
-				fetch_exchange_stage = 2;			
+				HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_SET); 		//夹子张开
+				HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_SET);
+				if(FunctionMODE == FETCHBIGMODE)
+					lift_pos = BIG_LIFT_POS;
+				else if(FunctionMODE == FETCHSMALLMODE)
+					lift_pos = SMALL_LIFT_POS;
+				lift(lift_pos);						
+				if(desired_angle[4] == lift_pos && motor_msg[4].angle > (lift_pos - 10000U))
+					fetch_exchange_stage = 1;
 			}
-		}
-		
-		//test
-		
-//		d_lift(test_angle_lift);
-//		flip(test_angle_flip);		
-		
-		//
-		
-		if(fetch_exchange_stage == 2)
-		{
-			if(RC_CtrlData.mouse.press_l == 1)    //按下鼠标左键
-				is_press = true;
 			
-			if(is_press == true && !RC_CtrlData.mouse.press_l)
+			if(fetch_exchange_stage == 1)
 			{
-				HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_RESET);			//加紧
-				HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_RESET);
+				flip(BIG_FLIP_POS);								//翻转
+				if(desired_angle[8] == BIG_FLIP_POS && motor_msg[8].angle > (BIG_FLIP_POS - 10000U))
+				{
+					HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_SET);					//伸出
+					fetch_exchange_stage = 2;			
+				}
+			}
+			
+			//test
+			
+	//		d_lift(test_angle_lift);
+	//		flip(test_angle_flip);		
+			//
+			
+			if(fetch_exchange_stage == 2)
+			{
+				if(RC_CtrlData.mouse.press_l == 1)    //按下鼠标左键
+					is_press = true;
 				
-				osDelay(1000);
-				
-				fetch_exchange_stage = 3;	
-				is_press = false;						
+				if(is_press == true && !RC_CtrlData.mouse.press_l)
+				{
+					HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_RESET);			//加紧
+					HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_RESET);
+					
+					osDelay(1000);
+					
+					fetch_exchange_stage = 3;	
+					is_press = false;						
+				}
 			}
-		}
-		
-		if(fetch_exchange_stage == 3)
-		{
-			flip(FLIP_HOLD_POS);
-			if(desired_angle[8] == FLIP_HOLD_POS && motor_msg[8].angle < (FLIP_HOLD_POS + 5000))						//抬起矿	
+			
+			if(fetch_exchange_stage == 3)
 			{
-				fetch_exchange_stage = 4;
-			}				
-		}
-		
-		if(fetch_exchange_stage == 4)//操作手判断环节
-		{
-			if(RC_CtrlData.mouse.press_r == 1)//右键取到矿石收回
-			{
-				fetch_exchange_stage = 5;
+				flip(FLIP_HOLD_POS);
+				if(desired_angle[8] == FLIP_HOLD_POS && motor_msg[8].angle < (FLIP_HOLD_POS + 5000))						//抬起矿	
+				{
+					fetch_exchange_stage = 4;
+				}				
 			}
-			else if(RC_CtrlData.mouse.press_l == 1)//左键没取到重来
+			
+			if(fetch_exchange_stage == 4)//操作手判断环节
 			{
-				fetch_exchange_stage = 0;
+				if(RC_CtrlData.mouse.press_r == 1)//右键取到矿石收回
+				{
+					fetch_exchange_stage = 5;
+				}
+				else if(RC_CtrlData.mouse.press_l == 1)//左键没取到重来
+				{
+					fetch_exchange_stage = 0;
+				}
 			}
+			
+			if(fetch_exchange_stage == 5)//降下
+			{
+				lift(1000);
+				if(desired_angle[4] == 1000 && motor_msg[4].angle < 10000)
+				{
+					para_wheel_front = 1.0;
+					FunctionMODE = STANDBY;
+				}				
+			}
+			
+			if(Key_Check_Hold(&Keys.KEY_B))		
+				is_exit = true;
 		}
-		
-		if(fetch_exchange_stage == 5)//降下
-		{
-			lift(1000);
-			if(desired_angle[4] == 1000 && motor_msg[4].angle < 10000)
-				FunctionMODE = STANDBY;					
-		}
-		
-		if(Key_Check_Hold(&Keys.KEY_B))		
-			is_exit = true;
 		
 		if(is_exit == true)
 		{			
@@ -211,10 +234,28 @@ void fetch_ore_in_hole(void)
 			if(desired_angle[8] == 5000 && motor_msg[8].angle < 15000 && desired_angle[4] == 1000 && motor_msg[4].angle<10000)
 			{
 				is_exit = false;
+				para_wheel_front = 1.0;
 				FunctionMODE = STANDBY;			
 			}
 		}
 	}
+}
+
+void fetch_on_ground(void)
+{
+	//初始保证上龙门架气缸回缩 上夹子回缩
+	//图传向下看
+	//下夹子前伸
+	//操作手对准
+	//点击夹矿
+	//抬起向上转
+	//图传平视避免干涉
+	//上夹子翻过来 
+	//上夹子加紧
+	//下夹子松开
+	//上夹子翻转
+	//下夹子下翻 张到合适位置 收回
+	
 }
 
 void exchange_task(void)
@@ -222,7 +263,8 @@ void exchange_task(void)
 	static bool is_press = false;
 	if(FunctionMODE == EXCHANGEMODE)
 	{
-		if(fetch_exchange_stage == 0)
+		para_wheel_front = 1.5;
+		if(fetch_exchange_stage == 0)//抬升
 		{
 			lift(EXCHANGE_POS);
 			if(desired_angle[4] == EXCHANGE_POS && motor_msg[4].angle > (EXCHANGE_POS - 10000U))
@@ -236,8 +278,8 @@ void exchange_task(void)
 				is_press = true;
 			if(is_press == true && !RC_CtrlData.mouse.press_l)
 			{
-				flip(FLIP_POS);
-				if(desired_angle[8] == FLIP_POS && motor_msg[8].angle > (FLIP_POS - 10000U))				
+				flip(EXCHANGE_FLIP_POS);
+				if(desired_angle[8] == EXCHANGE_FLIP_POS && motor_msg[8].angle > (EXCHANGE_FLIP_POS - 10000U))				
 				{
 					fetch_exchange_stage = 2;
 					is_press = false;
@@ -280,6 +322,7 @@ void exchange_task(void)
 			if(is_press == true && !RC_CtrlData.mouse.press_l)
 			{
 				flip(5000);
+				HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_RESET);					//缩回
 				if(desired_angle[8] == 5000 && motor_msg[8].angle < 20000U)
 				{
 					is_press = false;
@@ -291,7 +334,10 @@ void exchange_task(void)
 		{
 			lift(1000);
 			if(desired_angle[4] == 1000 && motor_msg[4].angle < 10000U)
+			{
+				para_wheel_front = 1.0;
 				FunctionMODE = STANDBY;
+			}
 		}
 	}
 }
@@ -366,15 +412,29 @@ void groundore_card_task(void)
 		pid_card_spd.outPID = 0;
 	else
 	{
+		pid_card_pos.pid_calculate(&pid_gndgrip_pos ,motor_msg[13].angle_desired,motor_msg[13].angle);
+		pid_card_spd.pid_calculate(&pid_gndgrip_spd,pid_gndgrip_pos.outPID,motor_msg[13].speed_actual);
+		
+		pid_card_pos.pid_calculate(&pid_gndmove_pos ,motor_msg[14].angle_desired,motor_msg[14].angle);
+		pid_card_spd.pid_calculate(&pid_gndmove_spd,pid_gndmove_pos.outPID,motor_msg[14].speed_actual);
+		
+		pid_card_pos.pid_calculate(&pid_gndrotate_pos ,motor_msg[12].angle_desired,motor_msg[12].angle);
+		pid_card_spd.pid_calculate(&pid_gndrotate_spd,pid_gndrotate_pos.outPID,motor_msg[12].speed_actual);
+		
 		pid_card_pos.pid_calculate(&pid_card_pos,motor_msg[15].angle_desired,motor_msg[15].angle);
 		pid_card_spd.pid_calculate(&pid_card_spd,pid_card_pos.outPID,motor_msg[15].speed_actual);
-		CAN2_Set_BackCur(0,0,0,pid_card_spd.outPID);	
+		motor_msg[12].given_current = pid_gndrotate_spd.outPID;
+		motor_msg[13].given_current = pid_gndgrip_spd.outPID;
+		motor_msg[14].given_current = pid_gndmove_spd.outPID;
+		motor_msg[15].given_current = pid_card_spd.outPID;
+		CAN2_Set_BackCur(pid_gndrotate_spd.outPID ,pid_gndgrip_spd.outPID ,pid_gndmove_spd.outPID ,pid_card_spd.outPID);	
 	}
 }
 void fetch_exchange_task(void)
 {
 	fetch_in_air();
 	fetch_ore_in_hole();
+	fetch_on_ground();
 	exchange_task();
 	//空接1 空接2 夹取1 夹取2
 	//兑换1 兑换2	
@@ -431,7 +491,7 @@ void flip(int32_t pos)
 //	}
 //	else
 //		desired_angle[8] = pos;
-	if(pos > 80000) pos = 80000;
+	if(pos > 86000) pos = 86000;
 	else if(pos < 0) pos = 0;
 	
 	desired_angle[8] = pos;

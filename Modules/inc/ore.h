@@ -14,7 +14,7 @@ void lift_task(void);
 void flip_spin_task(void);
 
 void fetch_in_air(void);
-
+void fetch_on_ground(void);
 void ONE_Key_Exchange(void);
 void Ore_Spin(void);
 uint8_t Ore_Suckin(void);

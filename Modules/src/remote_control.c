@@ -11,6 +11,7 @@
 #include "main.h"
 #include "ore.h"
 #include "pwm.h"
+#include "alltask.h"
 
 uint8_t FunctionMODE = 0;
 
@@ -145,15 +146,6 @@ void SetFuncMode(void)  //设置功能模式
     if(Key_Check_Hold(&Keys.KEY_Z) && Key_Check_Hold(&Keys.KEY_SHIFT))
       FunctionMODE = BARRIARMODE; 
 		
-		if(Key_Check_Hold(&Keys.KEY_C) && Key_Check_Hold(&Keys.KEY_SHIFT))
-			spin_flag = 1;
-		else if(Key_Check_Hold(&Keys.KEY_C) && Key_Check_Hold(&Keys.KEY_CTRL))
-			spin_flag = 2;
-		else if(Key_Check_Hold(&Keys.KEY_V) && Key_Check_Hold(&Keys.KEY_SHIFT))
-			spin_flag = 3;
-		else if(Key_Check_Hold(&Keys.KEY_V) && Key_Check_Hold(&Keys.KEY_CTRL))
-			spin_flag = 4;
-		else spin_flag = 0;
 		
     if(Key_Check_Hold(&Keys.KEY_X) && Key_Check_Hold(&Keys.KEY_SHIFT))
 		{
@@ -169,10 +161,8 @@ void SetFuncMode(void)  //设置功能模式
 				pos = 1000;
 			d_lift(pos);		
 		}
-		TIM4->CCR1 = 1250;   //救援障碍块复原
-		TIM4->CCR2 = 250;	
-//		TIM4->CCR3 = 1250;
-//		TIM4->CCR4 = 300;		
+		BARRIAR_L = BARRIAR_DEAUULT_L;   //救援障碍块复原
+		BARRIAR_R = BARRIAR_DEAUULT_R;	
 		CAMERA = 	DEFAULT_CAMERA_ANGEL;
 		
 		HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_RESET);//缩回
@@ -180,7 +170,18 @@ void SetFuncMode(void)  //设置功能模式
 		motor_msg[15].angle_desired = 1000;
     fetch_flag = 0;		
     fetch_exchange_stage = 0;
+		barriar_stage = 0;
   }
+	
+	if(Key_Check_Hold(&Keys.KEY_C) && Key_Check_Hold(&Keys.KEY_SHIFT))
+		spin_flag = 1;
+	else if(Key_Check_Hold(&Keys.KEY_C) && Key_Check_Hold(&Keys.KEY_CTRL))
+		spin_flag = 2;
+	else if(Key_Check_Hold(&Keys.KEY_V) && Key_Check_Hold(&Keys.KEY_SHIFT))
+		spin_flag = 3;
+	else if(Key_Check_Hold(&Keys.KEY_V) && Key_Check_Hold(&Keys.KEY_CTRL))
+		spin_flag = 4;
+	else spin_flag = 0;
 }
 
 /*	解算所有电机期望 	motor_msg 	[0]~[3] 	底盘电机	\

@@ -14,15 +14,11 @@ void PWM_Start(void)
   HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_3);  //æ»‘Æ◊Û
   HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_4);  //æ»‘Æ”“
   
-  HAL_TIM_PWM_Start(&htim5,TIM_CHANNEL_1);  //∏¥ªÓø®œÚœ¬
-  HAL_TIM_PWM_Start(&htim5,TIM_CHANNEL_2);  //∏¥ªÓø®…Ï≥ˆ
-  HAL_TIM_PWM_Start(&htim5,TIM_CHANNEL_3);  //’œ∞≠øÈ◊Û
-  HAL_TIM_PWM_Start(&htim5,TIM_CHANNEL_4);  //’œ∞≠øÈ”“
     
   HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_1);  //…„œÒÕ∑
 	
-  TIM4->CCR1 = 1250;							//”“∂Êª˙≥ı º1250£¨ ˙∆ ÀÆ∆Ω750 Ãß’œ∞≠øÈ1150
-	TIM4->CCR2 = 250;								//◊Û∂Êª˙		250						 750         350
+  TIM4->CCR1 = 900;							//”“∂Êª˙≥ı º900£¨ ˙∆ ÀÆ∆Ω330 Ãß’œ∞≠øÈ 760
+	TIM4->CCR2 = 650;								//◊Û∂Êª˙		650					1230         800
   
 	TIM4->CCR3 = 1250;								//æ»‘Æ◊Û≥ı º1250		810
 	TIM4->CCR4 = 300;								  //æ»‘Æ”“    300    770

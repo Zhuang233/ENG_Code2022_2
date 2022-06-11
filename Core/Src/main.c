@@ -112,7 +112,7 @@ const osThreadAttr_t ChassisTask_attributes = {
 osThreadId_t OreTaskHandle;
 const osThreadAttr_t OreTask_attributes = {
   .name = "OreTask",
-  .stack_size = 2048 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for OtherTask */
@@ -128,6 +128,13 @@ const osThreadAttr_t testTask_attributes = {
   .name = "testTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for Ore_Get_Task */
+osThreadId_t Ore_Get_TaskHandle;
+const osThreadAttr_t Ore_Get_Task_attributes = {
+  .name = "Ore_Get_Task",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 /* USER CODE BEGIN PV */
 
@@ -156,6 +163,7 @@ void StartChassisTask(void *argument);
 void StartOreTask(void *argument);
 void StartOtherTask(void *argument);
 void TestTask(void *argument);
+void StartOre_GetTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -265,6 +273,9 @@ int main(void)
 
   /* creation of testTask */
   testTaskHandle = osThreadNew(TestTask, NULL, &testTask_attributes);
+
+  /* creation of Ore_Get_Task */
+  Ore_Get_TaskHandle = osThreadNew(StartOre_GetTask, NULL, &Ore_Get_Task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1003,20 +1014,18 @@ void StartRefereeTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-			fetch_exchange_task();	//取矿、兑换任务
-		osDelay(1);
-//		static uint8_t first_run = 1;
-//		if(first_run)
-//		{
-//			draw_character(1);
-//			first_run = 0;
-//		}
-//		else 
-//			draw_character(2);
-//		
-//		draw_front_sight();
-//		
-//    osDelay(100);
+		static uint8_t first_run = 1;
+		if(first_run)
+		{
+			draw_character(1);
+			first_run = 0;
+		}
+		else 
+			draw_character(2);
+		
+		draw_front_sight();
+		
+    osDelay(100);
   }
   /* USER CODE END StartRefereeTask */
 }
@@ -1094,6 +1103,25 @@ void TestTask(void *argument)
     osDelay(10);
   }
   /* USER CODE END TestTask */
+}
+
+/* USER CODE BEGIN Header_StartOre_GetTask */
+/**
+* @brief Function implementing the Ore_Get_Task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartOre_GetTask */
+void StartOre_GetTask(void *argument)
+{
+  /* USER CODE BEGIN StartOre_GetTask */
+  /* Infinite loop */
+  for(;;)
+  {
+		fetch_exchange_task();	//取矿、兑换任务
+    osDelay(10);
+  }
+  /* USER CODE END StartOre_GetTask */
 }
 
 /**

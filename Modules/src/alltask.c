@@ -19,6 +19,9 @@ uint8_t barriar_stage = 0;
 
 bool rescuing = false;
 bool card_out = false;
+bool rescue_down = false;
+
+float para_wheel_front = 1.0;
 
 void chassis_task(void)
 {
@@ -32,6 +35,14 @@ void chassis_task(void)
     for(i=0;i<4;i++)
       pid_chassis_spd[i].pid_calculate(&pid_chassis_spd[i],motor_msg[i].speed_desired,motor_msg[i].speed_actual);
   }
+	
+	pid_chassis_spd[0].outPID *= para_wheel_front;
+	pid_chassis_spd[1].outPID *= para_wheel_front;
+	if(pid_chassis_spd[0].outPID > 16000) pid_chassis_spd[0].outPID = 16000;
+	if(pid_chassis_spd[0].outPID < -16000) pid_chassis_spd[0].outPID = -16000;
+	if(pid_chassis_spd[1].outPID > 16000) pid_chassis_spd[1].outPID = 16000;
+	if(pid_chassis_spd[1].outPID < -16000) pid_chassis_spd[1].outPID = -16000;
+	
   CAN1_Set_AheadCur(pid_chassis_spd[0].outPID,pid_chassis_spd[1].outPID,pid_chassis_spd[2].outPID,pid_chassis_spd[3].outPID);
   
 }
@@ -61,7 +72,7 @@ void rescue_task(void)
 	if(FunctionMODE == RESCUEMODE)
 	{
 		CAMERA = RESCUE_CAMERA_ANGEL;//调整图传视角
-		
+		para_wheel_front = 1.5;
 		if(!rescuing)//还没拖着车
 		{
 			if(RC_CtrlData.mouse.press_l)//单击左键救援
@@ -90,21 +101,43 @@ void rescue_task(void)
 		}
 
 		if(Key_Check_Hold(&Keys.KEY_B))//中途退出		
-				FunctionMODE = STANDBY;
+		{
+			para_wheel_front = 1.0;
+			FunctionMODE = STANDBY;
+		}
 	}
 }
 
 void barriar_task(void)
 {
-	bool is_press = false;
+	static bool is_press = false;
 	if(FunctionMODE == BARRIARMODE)
 	{
 		//后视视角
 		//图传看屏幕
+		CAMERA = SCREEN_CAMERA_ANGEL;
+		para_wheel_front = 1.5;
+		
+//		if(!rescue_down && RC_CtrlData.mouse.press_l )
+//		{
+//			BARRIAR_L = BARRIAR_DOWN_L;
+//			BARRIAR_R = BARRIAR_DOWN_R;
+//			
+//			osDelay(300);
+//			rescue_down = true;
+//		}
+//		else if(rescue_down && RC_CtrlData.mouse.press_l)
+//		{
+//			BARRIAR_L = BARRIAR_UP_L;
+//			BARRIAR_R = BARRIAR_UP_R;
+//			osDelay(300);
+//			rescue_down = false;
+//		}
+
 		if(barriar_stage == 0)			//平
 		{
-			TIM4->CCR1 = 750;
-			TIM4->CCR2 = 750;
+			BARRIAR_L = BARRIAR_DOWN_L;
+			BARRIAR_R = BARRIAR_DOWN_R;
 			barriar_stage = 1;
 		}
 		
@@ -113,12 +146,11 @@ void barriar_task(void)
 			if(RC_CtrlData.mouse.press_l == 1)
 			{
 				is_press = true;
-				while(RC_CtrlData.mouse.press_l);
 			}
-			if(is_press == true)
+			if(is_press == true && !RC_CtrlData.mouse.press_l)
 			{
-				TIM4->CCR1 = 1150;
-				TIM4->CCR2 = 350;
+				BARRIAR_L = BARRIAR_UP_L;
+				BARRIAR_R = BARRIAR_UP_R;
 				is_press = false;
 				barriar_stage = 2;
 			}
@@ -128,18 +160,21 @@ void barriar_task(void)
 			if(RC_CtrlData.mouse.press_l == 1)
 			{
 				is_press = true;
-				while(RC_CtrlData.mouse.press_l);
 			}
-			if(is_press == true)
+			if(is_press == true && !RC_CtrlData.mouse.press_l)
 			{
-				TIM4->CCR1 = 750;
-				TIM4->CCR2 = 750;
+				BARRIAR_L = BARRIAR_DOWN_L;
+				BARRIAR_R = BARRIAR_DOWN_R;
 				is_press = false;
 				barriar_stage = 1;
 			}			
 		}	
-		if(Key_Check_Hold(&Keys.KEY_B))		
+		
+		if(Key_Check_Hold(&Keys.KEY_B))
+		{
+			is_press = false;
 			FunctionMODE = STANDBY;
+		}
 	}
 }
 
@@ -148,6 +183,7 @@ void card_task(void)
 	if(FunctionMODE == CARDMODE)
 	{
 		CAMERA = CARD_CAMERA_ANGEL;
+		para_wheel_front = 1.5;
 		if(!card_out && RC_CtrlData.mouse.press_l )
 		{
 			desired_angle[15] = CARD_POS;
@@ -165,6 +201,7 @@ void card_task(void)
 	if(Key_Check_Hold(&Keys.KEY_B))
 	{
 		desired_angle[15] = 0;
+		para_wheel_front = 1.0;
 		card_out = false;
 		FunctionMODE = STANDBY;
 	}

@@ -3,7 +3,10 @@
 
 #include "main.h"
 
+extern float para_wheel_front;
 extern uint8_t card;
+extern uint8_t barriar_stage;
+
 void chassis_task(void);
 void ore_task(void);
 void remote_task(void);
