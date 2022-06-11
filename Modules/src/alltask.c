@@ -115,7 +115,9 @@ void barriar_task(void)
 	{
 		//后视视角
 		//图传看屏幕
+		HAL_GPIO_WritePin(GPIOE,GPIO_PIN_6,GPIO_PIN_SET);
 		CAMERA = SCREEN_CAMERA_ANGEL;
+		move(-1000000);
 		para_wheel_front = 1.5;
 		
 //		if(!rescue_down && RC_CtrlData.mouse.press_l )
@@ -173,6 +175,7 @@ void barriar_task(void)
 		if(Key_Check_Hold(&Keys.KEY_B))
 		{
 			is_press = false;
+			move(0);
 			FunctionMODE = STANDBY;
 		}
 	}

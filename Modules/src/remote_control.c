@@ -145,7 +145,9 @@ void SetFuncMode(void)  //设置功能模式
     //shift+Z 进入障碍块搬运
     if(Key_Check_Hold(&Keys.KEY_Z) && Key_Check_Hold(&Keys.KEY_SHIFT))
       FunctionMODE = BARRIARMODE; 
-		
+		//ctrl+E 进入夹地上矿
+		if(Key_Check_Hold(&Keys.KEY_E) && Key_Check_Hold(&Keys.KEY_CTRL))
+      FunctionMODE = GNDOREMODE;
 		
     if(Key_Check_Hold(&Keys.KEY_X) && Key_Check_Hold(&Keys.KEY_SHIFT))
 		{

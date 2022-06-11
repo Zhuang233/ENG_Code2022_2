@@ -282,6 +282,16 @@
           <WinNumber>2</WinNumber>
           <ItemText>\\ENG_Code\../Modules/src/remote_control.c\desired_angle[14],0x0A</ItemText>
         </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>FunctionMODE</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>fetch_exchange_stage,0x0A</ItemText>
+        </Ww>
       </WatchWindow2>
       <Tracepoint>
         <THDelay>0</THDelay>

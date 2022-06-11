@@ -37,6 +37,8 @@ float skd = 0.0;
 
 #define FLIP_HOLD_POS 30000U
 
+#define GND_MOVE_POS -2500000
+
 extern float para_wheel_front;
 uint32_t d_pos = 1000;
 uint8_t fetch_exchange_stage = 0;
@@ -255,6 +257,35 @@ void fetch_on_ground(void)
 	//下夹子松开
 	//上夹子翻转
 	//下夹子下翻 张到合适位置 收回
+	if(FunctionMODE == GNDOREMODE)
+	{
+		if(fetch_exchange_stage == 0)
+		{
+			move(GND_MOVE_POS);	//下爪子前移
+			CAMERA = DEFAULT_CAMERA_ANGEL;
+			osDelay(300);
+			HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_RESET);					//回缩
+			flip(5000);
+			osDelay(500);
+			CAMERA = GND_CAMERA_ANGEL;
+			while(motor_msg[14].angle > GND_MOVE_POS + 100000)
+			{
+				osDelay(1);
+			}
+			fetch_exchange_stage = 1; 
+		}
+		
+		if(fetch_exchange_stage == 1)
+		{
+			
+		}
+		
+		if(Key_Check_Hold(&Keys.KEY_B))
+		{
+			move(-200000);
+			FunctionMODE = STANDBY;
+		}
+	}
 	
 }
 
@@ -498,5 +529,11 @@ void flip(int32_t pos)
 	desired_angle[9] = -desired_angle[8];
 }
 
-
+void move(int32_t pos)
+{
+	if(pos > 0) pos = 0;
+	else if(pos < -2500000) pos = 2500000;
+	
+	desired_angle[14] = pos;
+}
 

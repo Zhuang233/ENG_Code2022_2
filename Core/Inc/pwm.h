@@ -26,8 +26,8 @@
 #define HOLE_CAMERA_ANGEL 850
 #define RESCUE_CAMERA_ANGEL 600
 #define CARD_CAMERA_ANGEL 600
-#define SCREEN_CAMERA_ANGEL 600//tochange
-
+#define SCREEN_CAMERA_ANGEL 400//tochange
+#define GND_CAMERA_ANGEL 600
 
 void PWM_Start(void);
 

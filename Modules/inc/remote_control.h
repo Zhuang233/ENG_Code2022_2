@@ -16,6 +16,7 @@
 #define RESCUEMODE 6
 #define CARDMODE 7
 #define BARRIARMODE 8
+#define GNDOREMODE 9
 
 //输入模式:遥控器/键盘鼠标/停止运行
 #define OK 1

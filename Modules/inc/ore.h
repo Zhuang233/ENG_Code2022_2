@@ -21,6 +21,7 @@ uint8_t Ore_Suckin(void);
 void flip(int32_t pos);
 void lift(int32_t pos);
 void d_lift(int32_t pos);
+void move(int32_t pos);
 void fetch_exchange_task(void);
 void fetch_ore_in_hole(void);
 void groundore_card_task(void);
