@@ -71,7 +71,7 @@
 #define PID_CARD_POS_KD 0.0f
 
 //×ª¿ó
-#define PID_SPIN_SPD_KP 3.0f
+#define PID_SPIN_SPD_KP 10.0f
 #define PID_SPIN_SPD_KI 2.0f
 #define PID_SPIN_SPD_KD 0.0f
 
@@ -150,7 +150,7 @@ void eng_pid_init(void)
 	for(i=0;i<2;i++)
 	{
 		pidInit(&pid_flip_spd[i],10000,16000,PID_FLIP_SPD_KP,PID_FLIP_SPD_KI,PID_FLIP_SPD_KD);
-		pidInit(&pid_flip_pos[i],0,8000,PID_FLIP_POS_KP,PID_FLIP_POS_KI,PID_FLIP_POS_KD);
+		pidInit(&pid_flip_pos[i],0,1000,PID_FLIP_POS_KP,PID_FLIP_POS_KI,PID_FLIP_POS_KD);
 		
 		pidInit(&pid_spin_spd[i],10000,10000,PID_SPIN_SPD_KP,PID_SPIN_SPD_KI,PID_SPIN_SPD_KD);
 	}

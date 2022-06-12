@@ -22,9 +22,9 @@ float skd = 0.0;
 //为应付中期写的，大部分需要重写
 
 #define SPINSPD_FAST 5000
-#define SPINSPD_SLOW 1000
+#define SPINSPD_SLOW 2000
 #define AIR_POS 370000U
-#define BIG_LIFT_POS 80000U
+#define BIG_LIFT_POS 90000U
 #define SMALL_LIFT_POS 100000U
 #define EXCHANGE_POS 370000U
 
@@ -295,14 +295,68 @@ void exchange_task(void)
 	if(FunctionMODE == EXCHANGEMODE)
 	{
 		para_wheel_front = 1.5;
-		if(fetch_exchange_stage == 0)//抬升
+		if(fetch_exchange_stage == 0)
+		{
+				flip(80000);//前翻看转矿
+			 if(RC_CtrlData.mouse.press_l)//当前前夹子可转到正常位置
+			 {
+					fetch_exchange_stage = 1;
+			 }
+			 else if(RC_CtrlData.mouse.press_r)//不可调整
+			 {
+					fetch_exchange_stage = 2;
+			 }
+		}
+		
+		if(fetch_exchange_stage == 2)
+		{
+			HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_RESET);					//缩着
+			flip(0);
+			osDelay(3000);
+			HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_SET);			//松开
+			HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_SET);
+			osDelay(700);
+			flip(40000);
+			fetch_exchange_stage = 3;
+		}
+		
+		if(fetch_exchange_stage == 3)
+		{
+				if(RC_CtrlData.mouse.press_l)//后面转完了
+			 {
+					flip(0);
+					osDelay(700);
+				 	HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_RESET);					//缩回
+					osDelay(500);
+					HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_RESET);			//加紧
+					HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_RESET);
+					osDelay(300);
+					flip(80000);
+					while(!RC_CtrlData.mouse.press_l)
+					{
+						if(RC_CtrlData.mouse.press_r)
+						{
+							fetch_exchange_stage = 2;
+							break;
+						}
+						osDelay(1);
+					}
+					if(fetch_exchange_stage == 3)
+					{
+						fetch_exchange_stage = 1;
+					}
+			 }
+		}
+		
+		
+		if(fetch_exchange_stage == 1)//抬升
 		{
 			lift(EXCHANGE_POS);
 			if(desired_angle[4] == EXCHANGE_POS && motor_msg[4].angle > (EXCHANGE_POS - 10000U))
-				fetch_exchange_stage = 1;
+				fetch_exchange_stage = 4;
 		}
 		
-		if(fetch_exchange_stage == 1)
+		if(fetch_exchange_stage == 4)
 		{
 			HAL_GPIO_WritePin(VALVE2_GPIO_Port,VALVE2_Pin,GPIO_PIN_SET);					//伸出
 			if(RC_CtrlData.mouse.press_l == 1)
@@ -312,13 +366,13 @@ void exchange_task(void)
 				flip(EXCHANGE_FLIP_POS);
 				if(desired_angle[8] == EXCHANGE_FLIP_POS && motor_msg[8].angle > (EXCHANGE_FLIP_POS - 10000U))				
 				{
-					fetch_exchange_stage = 2;
+					fetch_exchange_stage = 5;
 					is_press = false;
 				}
 			}
 		}
 		
-		if(fetch_exchange_stage == 2)
+		if(fetch_exchange_stage == 5)
 		{
 			if(RC_CtrlData.mouse.press_l == 1)			
 				is_press = true;
@@ -328,11 +382,11 @@ void exchange_task(void)
 				HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_SET);			//松开
 				HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_SET);
 				is_press = false;
-				fetch_exchange_stage = 3;
+				fetch_exchange_stage = 6;
 			}
 		}
 		
-		if(fetch_exchange_stage == 3)
+		if(fetch_exchange_stage == 6)
 		{
 			if(RC_CtrlData.mouse.press_l == 1)
 				is_press = true;
@@ -342,11 +396,11 @@ void exchange_task(void)
 				HAL_GPIO_WritePin(VALVE11_GPIO_Port,VALVE11_Pin,GPIO_PIN_RESET);		//合起来
 				HAL_GPIO_WritePin(VALVE12_GPIO_Port,VALVE12_Pin,GPIO_PIN_RESET);
 				is_press = false;
-				fetch_exchange_stage = 4;				
+				fetch_exchange_stage = 7;				
 			}
 		}
 		
-		if(fetch_exchange_stage == 4)
+		if(fetch_exchange_stage == 7)
 		{
 			if(RC_CtrlData.mouse.press_l == 1)
 				is_press = true;
@@ -357,11 +411,11 @@ void exchange_task(void)
 				if(desired_angle[8] == 5000 && motor_msg[8].angle < 20000U)
 				{
 					is_press = false;
-					fetch_exchange_stage = 5;
+					fetch_exchange_stage = 8;
 				}
 			}
 		}
-		if(fetch_exchange_stage == 5)
+		if(fetch_exchange_stage == 8)
 		{
 			lift(1000);
 			if(desired_angle[4] == 1000 && motor_msg[4].angle < 10000U)
